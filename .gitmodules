@@ -1,0 +1,3 @@
+[submodule "lib/pubsubclient"]
+	path = lib/pubsubclient
+	url = git@github.com:doebi/pubsubclient.git
