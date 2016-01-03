@@ -18,7 +18,7 @@
 class ESPApplication {
     private:
         void setup();
-        //LinkedList<Sender*> senders = LinkedList<Sender*>();
+        LinkedList<Sender*> senders = LinkedList<Sender*>();
         LinkedList<Receiver*> receivers = LinkedList<Receiver*>();
 
         ESP8266WiFiMulti WiFiMulti;
@@ -28,7 +28,8 @@ class ESPApplication {
         ESPApplication();
         ~ESPApplication();
         void loop();
-        void addReceiver(String topic, void (*callback)(String topic, String message));
+        void addReceiver(String topic, void (*callback)(MQTT::Publish pub));
+        void addSender(String topic, String (*tryPublish)(void));
 
         PubSubClient MQTTClient;
 

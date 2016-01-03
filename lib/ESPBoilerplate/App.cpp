@@ -47,9 +47,16 @@ void ESPApplication::loop() {
             MQTTClient.subscribe(MQTT_BASEPATH + "#");
         }
     }
+
+    for (int i = 0; i < senders.size(); ++i) {
+        MQTTClient.publish(MQTT_BASEPATH + "log", "oida");        
+    }
 }
 
-void ESPApplication::addReceiver(String topic, void (*callback)(String topic, String message)){
+void ESPApplication::addReceiver(String topic, void (*callback)(MQTT::Publish pub)){
     Receiver* r = new Receiver(topic, callback);
     receivers.add(r);
+}
+
+void ESPApplication::addSender(String topic, String (*tryPublish)(void)) {
 }
