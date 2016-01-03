@@ -19,4 +19,6 @@ void ESPApplication::loop() {
 }
 
 void ESPApplication::addReceiver(String topic, void (*callback)(String topic, String message)){
+    Receiver* r = new Receiver(topic, callback);
+    receivers.add(r);
 }

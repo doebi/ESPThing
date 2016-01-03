@@ -3,11 +3,13 @@
  * (c) by Christoph (doebi) Döberl
  *
  */
-typedef struct {
-    char * topic;
-} Sender_t;
 
-typedef struct {
-    char * topic;
-} Receiver_t;
-
+class Receiver {
+    public:
+        Receiver(String t, void (*c)(String topic, String message)){
+            topic = t;
+            callback = c;
+        }
+        String topic;
+        void (*callback)(String topic, String message);
+};

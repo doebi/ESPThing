@@ -8,16 +8,17 @@
 
 #include <Arduino.h>
 #include "Types.h"
+#include <LinkedList.h>
 
 class ESPApplication {
     private:
-        Sender_t * senders;
-        Receiver_t * receivers;
+        void setup();
+        //LinkedList<Sender_t*> senders = LinkedList<Sender_t*>();
+        LinkedList<Receiver*> receivers = LinkedList<Receiver*>();
 
     public:
         ESPApplication();
         ~ESPApplication();
-        void setup();
         void loop();
         void addReceiver(String topic, void (*callback)(String topic, String message));
 };

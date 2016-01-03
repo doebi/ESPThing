@@ -40,9 +40,6 @@ ESPApplication App;
 int PIN = 0;
 /* ~userconf */
 
-Sender_t * senders;
-Receiver_t * receivers;
-
 void callback(String topic, String message) {
 }
 
