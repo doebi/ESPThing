@@ -15,13 +15,10 @@
 #include <ESP8266WiFiMulti.h>
 #include "PubSubClient.h"
 
-String NODE_ID = "test";
-String MQTT_BASEPATH = "doebi/" + NODE_ID + "/";
-
 class ESPApplication {
     private:
         void setup();
-        //LinkedList<Sender_t*> senders = LinkedList<Sender_t*>();
+        //LinkedList<Sender*> senders = LinkedList<Sender*>();
         LinkedList<Receiver*> receivers = LinkedList<Receiver*>();
 
         ESP8266WiFiMulti WiFiMulti;
@@ -31,7 +28,6 @@ class ESPApplication {
         ESPApplication();
         ~ESPApplication();
         void loop();
-        void process_mqtt(const MQTT::Publish& pub);
         void addReceiver(String topic, void (*callback)(String topic, String message));
 
         PubSubClient MQTTClient;
