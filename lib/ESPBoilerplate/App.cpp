@@ -5,10 +5,14 @@
  */
 #include "App.h"
 
+#include <functional>
+#include "MQTT.h"
+
+
 String NODE_ID = "test";
 String MQTT_BASEPATH = "doebi/" + NODE_ID + "/";
 
-void mqtt_callback(const MQTT::Publish& pub) {
+void ESPApplication::mqtt_callback(const MQTT::Publish& pub) {
     /*
     String topic = pub.topic();
     String message = pub.payload_string();
@@ -42,8 +46,9 @@ void ESPApplication::loop() {
         MQTTClient.loop();
     } else {
         if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
+            std::function<void(const MQTT::Publish&)> callback = [=](const MQTT::Publish& publish) { this->mqtt_callback(publish); };
             MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
-            MQTTClient.set_callback(mqtt_callback);
+            MQTTClient.set_callback(callback);
             MQTTClient.subscribe(MQTT_BASEPATH + "#");
         }
     }

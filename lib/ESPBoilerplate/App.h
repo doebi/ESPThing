@@ -16,8 +16,12 @@
 #include "PubSubClient.h"
 
 class ESPApplication {
+    
     private:
+
         void setup();
+        void mqtt_callback(const MQTT::Publish& pub);
+
         LinkedList<Sender*> senders = LinkedList<Sender*>();
         LinkedList<Receiver*> receivers = LinkedList<Receiver*>();
 
@@ -25,6 +29,7 @@ class ESPApplication {
         WiFiClient w;
 
     public:
+
         ESPApplication();
         ~ESPApplication();
         void loop();
