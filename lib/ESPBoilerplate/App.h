@@ -6,8 +6,9 @@
 #ifndef _APP_H
 #define _APP_H
 
-#include <Arduino.h>
 #include "Types.h"
+#include "Arduino.h"
+#include "WiFi.h"
 
 class ESPApplication {
     private:

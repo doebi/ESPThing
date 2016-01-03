@@ -13,9 +13,13 @@ ESPApplication::~ESPApplication() {
 }
 
 void ESPApplication::setup() {
+    WiFiMulti.addAP("DildoAP", "dildo123");
 }
 
 void ESPApplication::loop() {
+    if (WiFi.status() != WL_CONNECTED) {
+        WiFiMulti.run();
+    }
 }
 
 void ESPApplication::addReceiver(String topic, void (*callback)(String topic, String message)){
