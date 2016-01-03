@@ -1,5 +1,6 @@
 /*
- * ESP Boilerplate OS - App.cpp
+ * ESP Boilerplate OS - Types.h
+ * (c) by Christoph (doebi) Döberl
  *
  */
 typedef struct {

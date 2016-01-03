@@ -1,5 +1,6 @@
 /*
  * ESP Boilerplate OS - App.cpp
+ * (c) by Christoph (doebi) Döberl
  *
  */
 #include "App.h"

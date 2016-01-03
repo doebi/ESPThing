@@ -1,5 +1,6 @@
 /*
  * ESP Boilerplate OS - App.h
+ * (c) by Christoph (doebi) Döberl
  *
  */
 #ifndef _APP_H
