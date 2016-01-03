@@ -12,7 +12,6 @@
 
 #define MQTT_ENABLED 1
 #define MQTT_HOST "mqtt.devlol.org"
-
 /* ~config */
 
 ESPApplication App;

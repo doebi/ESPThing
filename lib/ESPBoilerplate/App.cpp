@@ -8,22 +8,11 @@
 #include <functional>
 #include "MQTT.h"
 
+void ext_mqtt_callback(const MQTT::Publish& pub){
+}
 
 String NODE_ID = "test";
 String MQTT_BASEPATH = "doebi/" + NODE_ID + "/";
-
-void ESPApplication::mqtt_callback(const MQTT::Publish& pub) {
-    /*
-    String topic = pub.topic();
-    String message = pub.payload_string();
-
-    Receiver* r;
-    for(int i = 0; i < receivers.size(); i++){
-        r = receivers.get(i);
-        MQTTClient.publish("doebi/test/log", r->topic);
-    }
-    */
-}
 
 ESPApplication::ESPApplication() {
     setup();
@@ -46,9 +35,11 @@ void ESPApplication::loop() {
         MQTTClient.loop();
     } else {
         if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
+            /*
             std::function<void(const MQTT::Publish&)> callback = [=](const MQTT::Publish& publish) { this->mqtt_callback(publish); };
+            */
+            MQTTClient.set_callback(ext_mqtt_callback);
             MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
-            MQTTClient.set_callback(callback);
             MQTTClient.subscribe(MQTT_BASEPATH + "#");
         }
     }
@@ -64,4 +55,19 @@ void ESPApplication::addReceiver(String topic, void (*callback)(MQTT::Publish pu
 }
 
 void ESPApplication::addSender(String topic, String (*tryPublish)(void)) {
+    Sender* s = new Sender(topic, tryPublish);
+    senders.add(s);
+}
+
+void ESPApplication::mqtt_callback(const MQTT::Publish& pub) {
+    /*
+    String topic = pub.topic();
+    String message = pub.payload_string();
+
+    Receiver* r;
+    for(int i = 0; i < receivers.size(); i++){
+        r = receivers.get(i);
+        MQTTClient.publish("doebi/test/log", r->topic);
+    }
+    */
 }
