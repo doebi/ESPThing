@@ -8,35 +8,23 @@
 
 #include <Arduino.h>
 #include "Types.h"
-#include "MQTT.h"
-#include <LinkedList.h>
-
-#include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include "PubSubClient.h"
 
 class ESPApplication {
     
     private:
 
         void setup();
-        void mqtt_callback(const MQTT::Publish& pub);
-
-        LinkedList<Sender*> senders = LinkedList<Sender*>();
-        LinkedList<Receiver*> receivers = LinkedList<Receiver*>();
-
         ESP8266WiFiMulti WiFiMulti;
-        WiFiClient w;
+        // WiFiClient w;
+        // PubSubClient MQTTClient;
 
     public:
 
         ESPApplication();
         ~ESPApplication();
         void loop();
-        void addReceiver(String topic, void (*callback)(MQTT::Publish pub));
-        void addSender(String topic, String (*tryPublish)(void));
-
-        PubSubClient MQTTClient;
+        void log(String message);
 
 };
 
