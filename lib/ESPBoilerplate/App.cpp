@@ -20,7 +20,8 @@ ESPApplication::~ESPApplication() {
 void ESPApplication::setup() {
     log("setup");
     WiFiMulti.addAP("/dev/lol", "4dprinter");
-    // PubSubClient MQTTClient(w, "mqtt.devlol.org");
+    WiFiMulti.addAP("dit.net", "Faid4Youters$8Thurning2Prats!");
+    WiFiMulti.addAP("DildoAP", "dildo123");
 }
 
 void ESPApplication::loop() {
@@ -30,23 +31,6 @@ void ESPApplication::loop() {
             log("WiFi connected!");
         }
     }
-
-    /*
-
-    if (MQTTClient.connected()) {
-        MQTTClient.loop();
-    } else {
-        if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
-            MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
-            MQTTClient.set_callback(mqtt_callback);
-            MQTTClient.subscribe(MQTT_BASEPATH + "#");
-        }
-    }
-
-    for (int i = 0; i < senders.size(); ++i) {
-        MQTTClient.publish(MQTT_BASEPATH + "log", "oida");        
-    }
-    */
 }
 
 void ESPApplication::log(String message) {

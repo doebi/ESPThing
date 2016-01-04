@@ -13,14 +13,10 @@
 class ESPApplication {
     
     private:
-
         void setup();
         ESP8266WiFiMulti WiFiMulti;
-        // WiFiClient w;
-        // PubSubClient MQTTClient;
 
     public:
-
         ESPApplication();
         ~ESPApplication();
         void loop();
