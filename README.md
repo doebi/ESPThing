@@ -41,3 +41,9 @@ If the ESP is unable to connect to one of it's configured APs it falls back to A
 
 * add/delete WifiAPs (ssid, password)
 * edit MQTT host, topic
+
+### MQTT Topic Pattern
+
+<DOMAIN>/<MAC>/status    online|offline
+<DOMAIN>/<MAC>/tx/<name> <state>
+<DOMAIN>/<MAC>/rx/<name> <state>
