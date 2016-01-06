@@ -8,8 +8,12 @@
 #include "PubSubClient.h"
 #include "ESP8266WebServer.h"
 
-String NODE_ID = "test";
-String MQTT_BASEPATH = "doebi/" + NODE_ID + "/";
+#define CONNECT_TIME 1 //minutes until we go to fallback
+#define RECONNECT_TIME 1 //minutes until we try to reconnect
+
+String NODE_DOMAIN = "devlol";
+String NODE_ID = WiFi.macAddress();
+String MQTT_BASEPATH = NODE_DOMAIN + "/" + NODE_ID + "/";
 
 void mqtt_callback(const MQTT::Publish& pub) {
 }
@@ -35,7 +39,7 @@ void mqtt_loop() {
 
 void server_loop() {
     if (WiFi.softAPIP()){
-        Serial.println("AP up - handle client");
+        // Serial.println("AP up - handle client");
         server.handleClient();
     }
 }
@@ -47,6 +51,13 @@ void handleRoot() {
 void handleNotFound() {
     server.send(404, "text/html", "File Not Found");
 }
+
+typedef struct {
+    std::vector<WifiAPlist_t> APlist;
+    std::string friendlyName;
+    std::string mqttServer;
+    std::string mqttDomain;
+} app_config_t;
 
 class Receiver {
     public:
@@ -70,11 +81,14 @@ class Sender {
 
 class ESPApplication {
     private:
+        bool fallback = false;
+        int last_connect = 0;
         void setup() {
             log("setup");
             wm.addAP("/dev/lol", "4dprinter");
             wm.addAP("dit.net", "Faid4Youters$8Thurning2Prats!");
             wm.addAP("DildoAP", "dildo123");
+            wm.addAP("Flughafenfeuerwehr", "gwdmilfeuerwehr");
 
             // configure server
             server.on("/", handleRoot);
@@ -91,27 +105,32 @@ class ESPApplication {
         }
 
         void loop(){
-            switch (WiFi.status()) {
-                case WL_CONNECTED:
-                    // connect mqtt
-                    mqtt_loop();
-                    break;
-                case WL_DISCONNECTED:
-                    // try to AutoConnect
-                    wm.AutoConnect();
-                    break;
-                case WL_IDLE_STATUS:
-                    // handle webserver
-                    server_loop();
-                    break;
-                case WL_CONNECT_FAILED:
-                    // try again? or go with Fallback?
-                    wm.FallbackAP();
-                    break;
-                case WL_NO_SSID_AVAIL:
-                    // still running
-                    delay(100);
-                    break;
+            if (WiFi.status() == WL_CONNECTED) {
+                last_connect = millis(); // we still got connection (yay)
+                mqtt_loop();
+            } else {
+                if (fallback) {
+                    // in fallback mode we handle server
+                    if (last_connect + (1000 * 60 * RECONNECT_TIME) > millis()) {
+                        server_loop();
+                    } else {
+                        log("RECONNECT");
+                        fallback = false;
+                        last_connect = millis(); // reset timeout 
+                    }
+                } else {
+                    // if not in fallback mode try to connect to network
+                    if (last_connect + (1000 * 60 * CONNECT_TIME) > millis()) {
+                        wm.AutoConnect();
+                        delay(500);
+                    } else {
+                        // timeout reached we go to fallback
+                        log("TIMEOUT");
+                        fallback = true;
+                        wm.FallbackAP();
+                        last_connect = millis(); // reset timeout 
+                    }
+                }
             }
         }
 

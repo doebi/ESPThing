@@ -38,29 +38,6 @@ bool WiFiManager::addAP(const char* ssid, const char *passphrase) {
     return APlistAdd(ssid, passphrase);
 }
 
-void WiFiManager::loop() {
-    switch (WiFi.status()) {
-        case WL_CONNECTED:
-            // do nothing, all good
-            break;
-        case WL_DISCONNECTED:
-            // try to AutoConnect
-            AutoConnect();
-            break;
-        case WL_IDLE_STATUS:
-            // do nothing - We haz AP
-            break;
-        case WL_CONNECT_FAILED:
-            // try again? or go with Fallback?
-            FallbackAP();
-            break;
-        case WL_NO_SSID_AVAIL:
-            // still running
-            delay(100);
-            break;
-    }
-}
-
 wl_status_t WiFiManager::FallbackAP(void) {
     Serial.println("FallbackAP");
     WiFi.softAP("ESP-OPEN");
@@ -89,7 +66,7 @@ wl_status_t WiFiManager::AutoConnect(void) {
 
             if(scanResult <= 0) {
                 DEBUG_WIFI_MULTI("[WIFI] no networks found\n");
-                return FallbackAP();
+                return status;
             } else {
                 DEBUG_WIFI_MULTI("[WIFI] %d networks found\n", scanResult);
                 for(int8_t i = 0; i < scanResult; ++i) {
@@ -174,7 +151,7 @@ wl_status_t WiFiManager::AutoConnect(void) {
                 }
             } else {
                 DEBUG_WIFI_MULTI("[WIFI] no matching wifi found!\n");
-                return FallbackAP();
+                return status;
             }
         } else {
             // start scan
@@ -241,3 +218,6 @@ void WiFiManager::APlistClean(void) {
     APlist.clear();
 }
 
+std::vector<WifiAPlist_t> WiFiManager::getAPlist(void) {
+    return APlist;
+}
