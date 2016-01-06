@@ -11,7 +11,7 @@
 #define CONNECT_TIME 1 //minutes until we go to fallback
 #define RECONNECT_TIME 1 //minutes until we try to reconnect
 
-String NODE_DOMAIN = "devlol";
+String NODE_DOMAIN = "devlol/things";
 String NODE_ID = WiFi.macAddress();
 String MQTT_BASEPATH = NODE_DOMAIN + "/" + NODE_ID + "/";
 
@@ -79,7 +79,7 @@ class Sender {
         String (*tryPublish)(void);
 };
 
-class ESPApplication {
+class ESPThing {
     private:
         bool fallback = false;
         int last_connect = 0;
@@ -97,11 +97,11 @@ class ESPApplication {
         }
 
     public:
-        ESPApplication(){
+        ESPThing(){
             setup();
         }
 
-        ~ESPApplication(){
+        ~ESPThing(){
         }
 
         void loop(){
@@ -141,7 +141,7 @@ class ESPApplication {
         }
 };
 
-ESPApplication App;
+ESPThing Thing;
 
 void setup() {
     // For Debugging
@@ -149,5 +149,5 @@ void setup() {
 }
 
 void loop() {
-    App.loop();
+    Thing.loop();
 }
