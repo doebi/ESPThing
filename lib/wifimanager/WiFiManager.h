@@ -48,19 +48,18 @@ class WiFiManager {
         WiFiManager();
         ~WiFiManager();
 
-        bool addAP(const char* ssid, const char *passphrase = NULL);
         void loop();
+        
+        void setAPlist(std::vector<WifiAPlist_t> APlist);
+        std::vector<WifiAPlist_t> getAPlist();
 
         wl_status_t AutoConnect(void);
         wl_status_t FallbackAP(void);
 
-        std::vector<WifiAPlist_t> getAPlist();
 
     private:
-        std::vector<WifiAPlist_t> APlist;
-        bool APlistAdd(const char* ssid, const char *passphrase = NULL);
         void APlistClean(void);
-
+        std::vector<WifiAPlist_t> APlist;
 };
 
 #endif /* WIFIMANAGER_H_ */

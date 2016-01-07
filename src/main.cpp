@@ -7,35 +7,36 @@
 #include "WiFiManager.h"
 #include "PubSubClient.h"
 #include "ESP8266WebServer.h"
+#include <json/json.h>
 
-#define CONNECT_TIME 1 //minutes until we go to fallback
-#define RECONNECT_TIME 1 //minutes until we try to reconnect
+typedef struct {
+    std::vector<WifiAPlist_t> APlist;
+    String friendlyName;
+    String mqttServer;
+    String mqttDomain;
+} app_config_t;
 
-String NODE_DOMAIN = "devlol/things";
+app_config_t config = {
+    {
+        { "/dev/lol", "4dprinter" },
+        { "dit.net", "Faid4Youters$8Thurning2Prats!" },
+        { "Flughafenfeuerwehr", "gwdmilfeuerwehr" }
+    },
+    "MS3000",
+    "mqtt.devlol.org",
+    "devlol/things"
+};
+
+#define CONNECT_TIME 1   // minutes until we go to fallback
+#define RECONNECT_TIME 15 // minutes until we try to reconnect
+
 String NODE_ID = WiFi.macAddress();
-String MQTT_BASEPATH = NODE_DOMAIN + "/" + NODE_ID + "/";
-
-void mqtt_callback(const MQTT::Publish& pub) {
-}
+String MQTT_BASEPATH = config.mqttDomain + "/" + NODE_ID + "/";
 
 WiFiManager wm;
 WiFiClient wc;
-PubSubClient MQTTClient(wc, "mqtt.devlol.org");
+PubSubClient MQTTClient(wc, config.mqttServer);
 ESP8266WebServer server(80);
-
-void mqtt_loop() {
-    if (MQTTClient.connected()) {
-        MQTTClient.loop();
-    } else {
-        Serial.println("connecting MQTT");
-        if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
-            Serial.println("MQTT connected");
-            MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
-            MQTTClient.set_callback(mqtt_callback);
-            MQTTClient.subscribe(MQTT_BASEPATH + "#");
-        }
-    }
-}
 
 void server_loop() {
     if (WiFi.softAPIP()){
@@ -51,13 +52,6 @@ void handleRoot() {
 void handleNotFound() {
     server.send(404, "text/html", "File Not Found");
 }
-
-typedef struct {
-    std::vector<WifiAPlist_t> APlist;
-    std::string friendlyName;
-    std::string mqttServer;
-    std::string mqttDomain;
-} app_config_t;
 
 class Receiver {
     public:
@@ -83,12 +77,11 @@ class ESPThing {
     private:
         bool fallback = false;
         int last_connect = 0;
+        std::vector<Sender> senders;
+        std::vector<Receiver> receivers;
         void setup() {
             log("setup");
-            wm.addAP("/dev/lol", "4dprinter");
-            wm.addAP("dit.net", "Faid4Youters$8Thurning2Prats!");
-            wm.addAP("DildoAP", "dildo123");
-            wm.addAP("Flughafenfeuerwehr", "gwdmilfeuerwehr");
+            wm.setAPlist(config.APlist);
 
             // configure server
             server.on("/", handleRoot);
@@ -139,13 +132,61 @@ class ESPThing {
                 Serial.println(message);
             }
         }
+
+        std::vector<Sender> getSenders() {
+            return senders;
+        }
+
+        std::vector<Receiver> getReceivers() {
+            return receivers;
+        }
+
+        void mqtt_callback(const MQTT::Publish& pub) {
+            for(uint32_t x = 0; x < senders.size(); x++) {
+                Sender s = senders[x];
+                Serial.println(s.topic);
+            }
+        }
+
+        void mqtt_loop() {
+            if (MQTTClient.connected()) {
+                MQTTClient.loop();
+            } else {
+                Serial.println("connecting MQTT");
+                if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
+                    Serial.println("MQTT connected");
+                    std::function<void(const MQTT::Publish&)> callback = [=](const MQTT::Publish& publish) { this->mqtt_callback(publish); };
+                    MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
+                    MQTTClient.set_callback(callback);
+                    MQTTClient.subscribe(MQTT_BASEPATH + "#");
+                }
+            }
+        }
+
+        void addSender(Sender s) {
+            senders.push_back(s);
+        }
+
+        void addReceiver(Receiver r) {
+            receivers.push_back(r);
+        }
 };
 
 ESPThing Thing;
 
+String sender_cb() {
+    Serial.println("sender callback");
+}
+
+void receiver_cb(MQTT::Publish pub) {
+    Serial.println("receiver callback");
+}
+
 void setup() {
     // For Debugging
     Serial.begin(115200);
+    Thing.addSender(Sender("send_foobar", sender_cb));
+    Thing.addReceiver(Receiver("recv_foobar", receiver_cb));
 }
 
 void loop() {

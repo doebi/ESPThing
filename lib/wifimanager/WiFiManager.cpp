@@ -34,10 +34,6 @@ WiFiManager::~WiFiManager() {
     APlistClean();
 }
 
-bool WiFiManager::addAP(const char* ssid, const char *passphrase) {
-    return APlistAdd(ssid, passphrase);
-}
-
 wl_status_t WiFiManager::FallbackAP(void) {
     Serial.println("FallbackAP");
     WiFi.softAP("ESP-OPEN");
@@ -168,43 +164,6 @@ wl_status_t WiFiManager::AutoConnect(void) {
 
 // ##################################################################################
 
-bool WiFiManager::APlistAdd(const char* ssid, const char *passphrase) {
-
-    WifiAPlist_t newAP;
-
-    if(!ssid || *ssid == 0x00 || strlen(ssid) > 31) {
-        // fail SSID to long or missing!
-        DEBUG_WIFI_MULTI("[WIFI][APlistAdd] no ssid or ssid to long\n");
-        return false;
-    }
-
-    if(passphrase && strlen(passphrase) > 63) {
-        // fail passphrase to long!
-        DEBUG_WIFI_MULTI("[WIFI][APlistAdd] passphrase to long\n");
-        return false;
-    }
-
-    newAP.ssid = strdup(ssid);
-
-    if(!newAP.ssid) {
-        DEBUG_WIFI_MULTI("[WIFI][APlistAdd] fail newAP.ssid == 0\n");
-        return false;
-    }
-
-    if(passphrase && *passphrase != 0x00) {
-        newAP.passphrase = strdup(passphrase);
-        if(!newAP.passphrase) {
-            DEBUG_WIFI_MULTI("[WIFI][APlistAdd] fail newAP.passphrase == 0\n");
-            free(newAP.ssid);
-            return false;
-        }
-    }
-
-    APlist.push_back(newAP);
-    DEBUG_WIFI_MULTI("[WIFI][APlistAdd] add SSID: %s\n", newAP.ssid);
-    return true;
-}
-
 void WiFiManager::APlistClean(void) {
     for(uint32_t i = 0; i < APlist.size(); i++) {
         WifiAPlist_t entry = APlist[i];
@@ -216,6 +175,10 @@ void WiFiManager::APlistClean(void) {
         }
     }
     APlist.clear();
+}
+
+void WiFiManager::setAPlist(std::vector<WifiAPlist_t> a) {
+     APlist = a;
 }
 
 std::vector<WifiAPlist_t> WiFiManager::getAPlist(void) {
