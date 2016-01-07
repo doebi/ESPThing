@@ -142,6 +142,7 @@ class ESPThing {
         }
 
         void mqtt_callback(const MQTT::Publish& pub) {
+            Serial.println("MQTT: " + pub.topic() + " = " + pub.payload_string());
             for(uint32_t x = 0; x < senders.size(); x++) {
                 Sender s = senders[x];
                 Serial.println(s.topic);
