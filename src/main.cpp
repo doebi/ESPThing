@@ -70,12 +70,12 @@ class Input {
 class Output {
     public:
         Output(){};
-        Output(String t, String (*l)(void)){
+        Output(String t, void (*l)(String * msg)){
             topic = t;
             loop = l;
         }
         String topic;
-        String (*loop)(void);
+        void (*loop)(String * msg);
 };
 
 class ESPThing {
@@ -108,12 +108,10 @@ class ESPThing {
                 mqtt_loop();
                 String msg;
                 for (auto &o : outputs) {
-                    /*
-                    msg = o.loop();
+                    o.loop(&msg);
                     if (msg != NULL) {
-                        MQTTClient.publish(MQTT_BASEPATH + o.topic, String(msg));
+                        MQTTClient.publish(MQTT_BASEPATH + o.topic, msg);
                     }
-                    */
                 }
             } else {
                 if (fallback) {
@@ -198,11 +196,11 @@ void mqtt_callback(const MQTT::Publish& pub) {
 bool ping = false;
 String ping_msg = "";
 
-String pong_loop() {
+void pong_loop(String * msg) {
     if (ping) {
         ping = false;
         Serial.println("PONG: " + ping_msg);
-        return ping_msg;
+        *msg = ping_msg;
     }
 }
 
