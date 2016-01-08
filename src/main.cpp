@@ -59,23 +59,23 @@ void handleNotFound() {
 class Input {
     public:
         Input(){};
-        Input(String t, void (*c)(MQTT::Publish pub)){
+        Input(String t, void (*c)(const MQTT::Publish& pub)){
             topic = t;
             callback = c;
         }
         String topic;
-        void (*callback)(MQTT::Publish pub);
+        void (*callback)(const MQTT::Publish& pub);
 };
 
 class Output {
     public:
         Output(){};
-        Output(String t, String (*tp)(void)){
+        Output(String t, String (*l)(void)){
             topic = t;
-            tryPublish = tp;
+            loop = l;
         }
         String topic;
-        String (*tryPublish)(void);
+        String (*loop)(void);
 };
 
 class ESPThing {
@@ -106,6 +106,15 @@ class ESPThing {
             if (WiFi.status() == WL_CONNECTED) {
                 last_connect = millis(); // we still got connection (yay)
                 mqtt_loop();
+                String msg;
+                for (auto &o : outputs) {
+                    /*
+                    msg = o.loop();
+                    if (msg != NULL) {
+                        MQTTClient.publish(MQTT_BASEPATH + o.topic, String(msg));
+                    }
+                    */
+                }
             } else {
                 if (fallback) {
                     // in fallback mode we handle server
@@ -176,8 +185,9 @@ void mqtt_callback(const MQTT::Publish& pub) {
 
     std::vector<Input> inputs = Thing.getInputs();
     for (auto &i : inputs) {
-        //i.callback(pub);
-        //Serial.println(i.topic);
+        if (pub.topic() == (MQTT_BASEPATH + i.topic)) {
+            i.callback(pub);
+        }
     }
 }
 
@@ -190,13 +200,20 @@ String ping_msg = "";
 
 String pong_loop() {
     if (ping) {
+        ping = false;
+        Serial.println("PONG: " + ping_msg);
         return ping_msg;
     }
 }
 
-void ping_cb(MQTT::Publish pub) {
-    ping = true;
+void ping_cb(const MQTT::Publish& pub) {
+    Serial.println("PING: " + pub.payload_string());
     ping_msg = pub.payload_string();
+    ping = true;
+}
+
+void hello_cb(const MQTT::Publish& pub) {
+    Serial.println("HELLO: " + pub.payload_string());
 }
 
 void setup() {
@@ -205,6 +222,7 @@ void setup() {
 
     Thing.addOutput(Output("pong", pong_loop));
     Thing.addInput(Input("ping", ping_cb));
+    Thing.addInput(Input("hello", hello_cb));
 }
 
 void loop() {
