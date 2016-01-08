@@ -20,6 +20,7 @@ app_config_t config = {
     {
         { "/dev/lol", "4dprinter" },
         { "dit.net", "Faid4Youters$8Thurning2Prats!" },
+        { "Uplink", "level3support" },
         { "Flughafenfeuerwehr", "gwdmilfeuerwehr" }
     },
     "MS3000",
@@ -37,6 +38,8 @@ WiFiManager wm;
 WiFiClient wc;
 PubSubClient MQTTClient(wc, config.mqttServer);
 ESP8266WebServer server(80);
+
+void mqtt_callback(const MQTT::Publish& pub);
 
 void server_loop() {
     if (WiFi.softAPIP()){
@@ -141,14 +144,6 @@ class ESPThing {
             return receivers;
         }
 
-        void mqtt_callback(const MQTT::Publish& pub) {
-            Serial.println("MQTT: " + pub.topic() + " = " + pub.payload_string());
-            for(uint32_t x = 0; x < senders.size(); x++) {
-                Sender s = senders[x];
-                Serial.println(s.topic);
-            }
-        }
-
         void mqtt_loop() {
             if (MQTTClient.connected()) {
                 MQTTClient.loop();
@@ -156,9 +151,8 @@ class ESPThing {
                 Serial.println("connecting MQTT");
                 if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
                     Serial.println("MQTT connected");
-                    std::function<void(const MQTT::Publish&)> callback = [=](const MQTT::Publish& publish) { this->mqtt_callback(publish); };
                     MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
-                    MQTTClient.set_callback(callback);
+                    MQTTClient.set_callback(mqtt_callback);
                     MQTTClient.subscribe(MQTT_BASEPATH + "#");
                 }
             }
@@ -174,6 +168,21 @@ class ESPThing {
 };
 
 ESPThing Thing;
+
+void mqtt_callback(const MQTT::Publish& pub) {
+    Serial.println("MQTT: " + pub.topic() + " = " + pub.payload_string());
+
+    std::vector<Receiver> receivers = Thing.getReceivers();
+    for(uint32_t x = 0; x < receivers.size(); x++) {
+        Receiver r = receivers[x];
+        //r.callback(pub);
+        Serial.println(r.topic);
+    }
+}
+
+/* ************* Thing End *************** */
+/* add your Thing specific code below here */
+/* *************************************** */
 
 String sender_cb() {
     Serial.println("sender callback");
