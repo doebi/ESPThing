@@ -6,9 +6,9 @@ Additionally it provides an easy way of reconfiguration without the need to refl
 ### Input
 An Input listen on a specific topic for incoming messages and execute the supplied callback function once a new message arrives.
 
-### Senders
-Work the other way round. You implement a tryPublish method, which is executed in loop().
-When this method returns a String this String is sent as message to the receivers topic.
+### Output
+Work the other way round. You implement a method, which is executed in loop().
+When this method defines a String at msg, it is sent as message to the outputs topic.
 
 ### Example
 In this small exmaple we define an Input **ping** and an Output **pong**.
