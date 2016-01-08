@@ -43,7 +43,6 @@ void mqtt_callback(const MQTT::Publish& pub);
 
 void server_loop() {
     if (WiFi.softAPIP()){
-        // Serial.println("AP up - handle client");
         server.handleClient();
     }
 }
@@ -157,9 +156,9 @@ class ESPThing {
             if (MQTTClient.connected()) {
                 MQTTClient.loop();
             } else {
-                Serial.println("connecting MQTT");
+                log("connecting MQTT");
                 if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
-                    Serial.println("MQTT connected");
+                    log("MQTT connected");
                     MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
                     MQTTClient.set_callback(mqtt_callback);
                     MQTTClient.subscribe(MQTT_BASEPATH + "#");
@@ -179,8 +178,6 @@ class ESPThing {
 ESPThing Thing;
 
 void mqtt_callback(const MQTT::Publish& pub) {
-    Serial.println("MQTT: " + pub.topic() + " = " + pub.payload_string());
-
     std::vector<Input> inputs = Thing.getInputs();
     for (auto &i : inputs) {
         if (pub.topic() == (MQTT_BASEPATH + i.topic)) {
@@ -199,28 +196,18 @@ String ping_msg = "";
 void pong_loop(String * msg) {
     if (ping) {
         ping = false;
-        Serial.println("PONG: " + ping_msg);
         *msg = ping_msg;
     }
 }
 
 void ping_cb(const MQTT::Publish& pub) {
-    Serial.println("PING: " + pub.payload_string());
     ping_msg = pub.payload_string();
     ping = true;
 }
 
-void hello_cb(const MQTT::Publish& pub) {
-    Serial.println("HELLO: " + pub.payload_string());
-}
-
 void setup() {
-    // For Debugging
-    Serial.begin(115200);
-
     Thing.addOutput(Output("pong", pong_loop));
     Thing.addInput(Input("ping", ping_cb));
-    Thing.addInput(Input("hello", hello_cb));
 }
 
 void loop() {
