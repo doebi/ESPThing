@@ -56,9 +56,10 @@ void handleNotFound() {
     server.send(404, "text/html", "File Not Found");
 }
 
-class Receiver {
+class Input {
     public:
-        Receiver(String t, void (*c)(MQTT::Publish pub)){
+        Input(){};
+        Input(String t, void (*c)(MQTT::Publish pub)){
             topic = t;
             callback = c;
         }
@@ -66,9 +67,10 @@ class Receiver {
         void (*callback)(MQTT::Publish pub);
 };
 
-class Sender {
+class Output {
     public:
-        Sender(String t, String (*tp)(void)){
+        Output(){};
+        Output(String t, String (*tp)(void)){
             topic = t;
             tryPublish = tp;
         }
@@ -80,8 +82,8 @@ class ESPThing {
     private:
         bool fallback = false;
         int last_connect = 0;
-        std::vector<Sender> senders;
-        std::vector<Receiver> receivers;
+        std::vector<Output> outputs;
+        std::vector<Input> inputs;
         void setup() {
             log("setup");
             wm.setAPlist(config.APlist);
@@ -136,12 +138,12 @@ class ESPThing {
             }
         }
 
-        std::vector<Sender> getSenders() {
-            return senders;
+        std::vector<Output> getOutputs() {
+            return outputs;
         }
 
-        std::vector<Receiver> getReceivers() {
-            return receivers;
+        std::vector<Input> getInputs() {
+            return inputs;
         }
 
         void mqtt_loop() {
@@ -158,12 +160,12 @@ class ESPThing {
             }
         }
 
-        void addSender(Sender s) {
-            senders.push_back(s);
+        void addOutput(const Output &o) {
+            outputs.push_back(o);
         }
 
-        void addReceiver(Receiver r) {
-            receivers.push_back(r);
+        void addInput(const Input &i) {
+            inputs.push_back(i);
         }
 };
 
@@ -172,11 +174,10 @@ ESPThing Thing;
 void mqtt_callback(const MQTT::Publish& pub) {
     Serial.println("MQTT: " + pub.topic() + " = " + pub.payload_string());
 
-    std::vector<Receiver> receivers = Thing.getReceivers();
-    for(uint32_t x = 0; x < receivers.size(); x++) {
-        Receiver r = receivers[x];
-        //r.callback(pub);
-        Serial.println(r.topic);
+    std::vector<Input> inputs = Thing.getInputs();
+    for (auto &i : inputs) {
+        //i.callback(pub);
+        //Serial.println(i.topic);
     }
 }
 
@@ -184,19 +185,26 @@ void mqtt_callback(const MQTT::Publish& pub) {
 /* add your Thing specific code below here */
 /* *************************************** */
 
-String sender_cb() {
-    Serial.println("sender callback");
+bool ping = false;
+String ping_msg = "";
+
+String pong_loop() {
+    if (ping) {
+        return ping_msg;
+    }
 }
 
-void receiver_cb(MQTT::Publish pub) {
-    Serial.println("receiver callback");
+void ping_cb(MQTT::Publish pub) {
+    ping = true;
+    ping_msg = pub.payload_string();
 }
 
 void setup() {
     // For Debugging
     Serial.begin(115200);
-    Thing.addSender(Sender("send_foobar", sender_cb));
-    Thing.addReceiver(Receiver("recv_foobar", receiver_cb));
+
+    Thing.addOutput(Output("pong", pong_loop));
+    Thing.addInput(Input("ping", ping_cb));
 }
 
 void loop() {
