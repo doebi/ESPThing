@@ -14,7 +14,7 @@ Optionally you can add a third parameter to the Output class. An interval in mil
 ### Example
 In this small exmaple we define an Input **ping** and an Output **pong**.
 When we receive a ping on topic ping, we send a reply on topic pong.
-And a heartbeat is send every 3 minutes.
+And a **heartbeat** is send every 3 minutes.
 
 ```arduino
 
@@ -48,7 +48,7 @@ void loop() {
 }
 ```
 
-The topics for this this example would be:
+The topics for this example would be:
 
 ```
 domain/FF:FF:FF:FF:FF:FF/ping
