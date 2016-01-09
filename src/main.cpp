@@ -72,9 +72,17 @@ class Output {
         Output(String t, void (*l)(String * msg)){
             topic = t;
             loop = l;
+            interval = 0;
+        };
+        Output(String t, void (*l)(String * msg), int i){
+            topic = t;
+            loop = l;
+            interval = i;
         }
         String topic;
         void (*loop)(String * msg);
+        int interval;
+        int last_run = 0;
 };
 
 class ESPThing {
@@ -106,10 +114,14 @@ class ESPThing {
                 last_connect = millis(); // we still got connection (yay)
                 mqtt_loop();
                 String msg;
+                int now = millis();
                 for (auto &o : outputs) {
-                    o.loop(&msg);
-                    if (msg != NULL) {
-                        MQTTClient.publish(MQTT_BASEPATH + o.topic, msg);
+                    if (o.last_run + o.interval <= now) {
+                        o.loop(&msg);
+                        if (msg != NULL) {
+                            MQTTClient.publish(MQTT_BASEPATH + o.topic, msg);
+                        }
+                        o.last_run = now;
                     }
                 }
             } else {
@@ -200,6 +212,10 @@ void pong_loop(String * msg) {
     }
 }
 
+void heartbeat_loop(String * msg) {
+    *msg = String(millis());
+}
+
 void ping_cb(const MQTT::Publish& pub) {
     ping_msg = pub.payload_string();
     ping = true;
@@ -207,6 +223,7 @@ void ping_cb(const MQTT::Publish& pub) {
 
 void setup() {
     Thing.addOutput(Output("pong", pong_loop));
+    Thing.addOutput(Output("heartbeat", heartbeat_loop, 1000 * 60 * 3));
     Thing.addInput(Input("ping", ping_cb));
 }
 

@@ -9,10 +9,12 @@ An Input listen on a specific topic for incoming messages and execute the suppli
 ### Output
 Work the other way round. You implement a method, which is executed in loop().
 When this method defines a String at msg, it is sent as message to the outputs topic.
+Optionally you can add a third parameter to the Output class. An interval in milliseconds in which the loop method should be ecexuted. This defaults to 0.
 
 ### Example
 In this small exmaple we define an Input **ping** and an Output **pong**.
 When we receive a ping on topic ping, we send a reply on topic pong.
+And a heartbeat is send every 3 minutes.
 
 ```arduino
 
@@ -31,8 +33,13 @@ void ping_cb(const MQTT::Publish& pub) {
     ping = true;
 }
 
+void heartbeat_loop(String * msg) {
+    *msg = String(millis());
+}
+
 void setup() {
     Thing.addOutput(Output("pong", pong_loop));
+    Thing.addOutput(Output("heartbeat", heartbeat_loop, 1000 * 60 * 3));
     Thing.addInput(Input("ping", ping_cb));
 }
 
