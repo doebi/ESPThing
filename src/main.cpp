@@ -171,9 +171,13 @@ class ESPThing {
                 log("connecting MQTT");
                 if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
                     log("MQTT connected");
-                    MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
                     MQTTClient.set_callback(mqtt_callback);
                     MQTTClient.subscribe(MQTT_BASEPATH + "#");
+                    MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
+                    if (config.friendlyName) {
+                        // if configured, publish our friendlyName
+                        MQTTClient.publish(MQTT_BASEPATH + "name", config.friendlyName, true);
+                    }
                 }
             }
         }
