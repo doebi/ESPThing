@@ -4,16 +4,16 @@ The Basic Idea is to provide a working Firmware for ESP, where one can manually 
 Additionally it provides an easy way of reconfiguration without the need to reflash via a webinterface.
 
 ### Input
-An Input listen on a specific topic for incoming messages and execute the supplied callback function once a new message arrives.
+An Input listens on a specific topic for incoming messages and executes the supplied callback function once a new message arrives.
 
 ### Output
-Work the other way round. You implement a method, which is executed in loop().
+They work the other way round. You implement a method, which is executed in loop().
 When this method defines a String at msg, it is sent as message to the outputs topic.
-Optionally you can add a third parameter to the Output class. An interval in milliseconds in which the loop method should be ecexuted. This defaults to 0.
+Optionally you can add a third parameter to the Output class. An interval in milliseconds in which the loop method should be executed. This defaults to 0.
 
 ### Example
 In this small exmaple we define an Input **ping** and an Output **pong**.
-When we receive a ping on topic ping, we send a reply on topic pong.
+When we receive a message on topic ping, we send a reply on topic pong.
 And a **heartbeat** is send every 3 minutes.
 
 ```arduino
@@ -57,7 +57,7 @@ domain/FF:FF:FF:FF:FF:FF/heartbeat
 ```
 
 ### Reconfiguration
-If the ESP is unable to connect to one of it's configured APs it falls back to AP Mode. The user can then connect to the AP and reconfigure settings.
+If the ESP is unable to connect to one of it's configured APs it falls back to AP Mode. The user can then connect to the AP and reconfigure settings. [this feature is not yet implemented]
 
 * add/delete WifiAPs (ssid, password)
 * edit MQTT host, domain, topic
