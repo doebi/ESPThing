@@ -1,3 +1,8 @@
+/*
+ * ESP Boilerplate OS - main.cpp
+ * (c) by Christoph (doebi) Döberl
+ *
+ */
 #include "ESPThing.h"
 
 bool ping = false;

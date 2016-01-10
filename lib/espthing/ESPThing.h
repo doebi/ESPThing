@@ -1,5 +1,5 @@
 /*
- * ESP Boilerplate OS - main.cpp
+ * ESP Boilerplate OS - ESPThing.h
  * (c) by Christoph (doebi) Döberl
  *
  */
@@ -8,29 +8,7 @@
 #include "PubSubClient.h"
 #include "ESP8266WebServer.h"
 #include <json/json.h>
-
-typedef struct {
-    std::vector<WifiAPlist_t> APlist;
-    String friendlyName;
-    String mqttServer;
-    String mqttDomain;
-    int connectTime;
-    int reconnectTime;
-} thing_config_t;
-
-thing_config_t config = {
-    {
-        { "/dev/lol", "4dprinter" },
-        { "dit.net", "Faid4Youters$8Thurning2Prats!" },
-        { "Uplink", "level3support" },
-        { "Flughafenfeuerwehr", "gwdmilfeuerwehr" }
-    },
-    "MS3000",
-    "mqtt.devlol.org",
-    "devlol/things",
-    60,
-    60 * 15
-};
+#include "config.h"
 
 String NODE_ID = WiFi.macAddress();
 String MQTT_BASEPATH = config.mqttDomain + "/" + NODE_ID + "/";
