@@ -14,6 +14,8 @@ typedef struct {
     String friendlyName;
     String mqttServer;
     String mqttDomain;
+    int connectTime;
+    int reconnectTime;
 } app_config_t;
 
 app_config_t config = {
@@ -25,11 +27,10 @@ app_config_t config = {
     },
     "MS3000",
     "mqtt.devlol.org",
-    "devlol/things"
+    "devlol/things",
+    60,
+    60 * 15
 };
-
-#define CONNECT_TIME 1   // minutes until we go to fallback
-#define RECONNECT_TIME 15 // minutes until we try to reconnect
 
 String NODE_ID = WiFi.macAddress();
 String MQTT_BASEPATH = config.mqttDomain + "/" + NODE_ID + "/";
@@ -127,7 +128,7 @@ class ESPThing {
             } else {
                 if (fallback) {
                     // in fallback mode we handle server
-                    if (last_connect + (1000 * 60 * RECONNECT_TIME) > millis()) {
+                    if (last_connect + (1000 * config.reconnectTime) > millis()) {
                         server_loop();
                     } else {
                         log("RECONNECT");
@@ -136,7 +137,7 @@ class ESPThing {
                     }
                 } else {
                     // if not in fallback mode try to connect to network
-                    if (last_connect + (1000 * 60 * CONNECT_TIME) > millis()) {
+                    if (last_connect + (1000 * config.connectTime) > millis()) {
                         wm.AutoConnect();
                         delay(500);
                     } else {
