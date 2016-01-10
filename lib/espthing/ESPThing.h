@@ -16,9 +16,9 @@ typedef struct {
     String mqttDomain;
     int connectTime;
     int reconnectTime;
-} app_config_t;
+} thing_config_t;
 
-app_config_t config = {
+thing_config_t config = {
     {
         { "/dev/lol", "4dprinter" },
         { "dit.net", "Faid4Youters$8Thurning2Prats!" },
