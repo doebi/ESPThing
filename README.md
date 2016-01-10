@@ -53,6 +53,7 @@ The topics for this example would be:
 ```
 domain/FF:FF:FF:FF:FF:FF/ping
 domain/FF:FF:FF:FF:FF:FF/pong
+domain/FF:FF:FF:FF:FF:FF/heartbeat
 ```
 
 ### Reconfiguration
