@@ -4,8 +4,6 @@
  *
  */
 #include "Arduino.h"
-#include "WiFiManager.h"
-#include <vector>
 
 typedef struct {
     std::vector<WifiAPlist_t> APlist;
@@ -14,17 +12,18 @@ typedef struct {
     String mqttDomain;
     int connectTime;
     int reconnectTime;
-    bool includeMac;
 } thing_config_t;
 
 thing_config_t config = {
     {
-        { "ssid", "password" }
+        { "/dev/lol", "4dprinter" },
+        { "dit.net", "Faid4Youters$8Thurning2Prats!" },
+        { "Uplink", "level3support" },
+        { "Flughafenfeuerwehr", "gwdmilfeuerwehr" }
     },
-    "mqtt-device-name",
+    "MS3000",
     "mqtt.devlol.org",
     "devlol/things",
     60,
-    60 * 15,
-    true
+    60 * 15
 };
