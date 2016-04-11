@@ -11,7 +11,16 @@
 #include "config.h"
 
 String NODE_ID = WiFi.macAddress();
-String MQTT_BASEPATH = config.mqttDomain + "/" + NODE_ID + "/";
+
+String mqttBasepath() {
+  String path = config.mqttDomain + "/";
+  if (config.includeMac) {
+    path = path + NODE_ID + "/";
+  }
+  return path;
+}
+
+String MQTT_BASEPATH = mqttBasepath();
 
 WiFiManager wm;
 WiFiClient wc;
