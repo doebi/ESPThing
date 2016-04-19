@@ -84,23 +84,31 @@ class ESPThing {
          * \param i the interval in milliseconds after which the callback function is called
          */
         void publish(String t, void (*l)(String * msg), int i = 0);
+
+
+        bool wifiConnected();
+
+        bool mqttClientConnected();
+
+        bool mqttThingClientConnected();
         
     private:
-        bool fallback = false;
-        int last_connect = 0;
-        std::vector<Output> outputs;
-        std::vector<Input> inputs;
-        
         void setup();
         void log(String message);
-        void mqtt_loop();
+        
         void server_loop();
         void handleRoot();
         void handleNotFound();
-        void mqtt_callback(const MQTT::Publish& pub);
 
-        void subscribe(String t, void (*c)(const MQTT::Publish& pub), bool internal);
-        void publish(String t, void (*l)(String * msg), int i, bool internal);
+
+        std::vector<Input> _mqtt_thingInputs;
+        std::vector<Input> _mqtt_inputs;
+        void mqtt_loop();
+        void mqtt_callback(const MQTT::Publish& pub, const std::vector<Input> &inputs);
+        void mqtt_publishLoop(std::vector<Output> &outputs, PubSubClient &mqttClient);
+        void mqtt_subscribe(String t, void (*c)(const MQTT::Publish& pub), bool internal);
+        void mqtt_publish(String t, void (*l)(String * msg), int i, bool internal);
+        bool singleMqttClient();
 };
 
 #endif /* ESPTHING_H_ */
