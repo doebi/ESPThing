@@ -33,7 +33,7 @@ String buildTopic(String t, bool internal) {
 // ##################################################################################
 
 Input::Input(String t, void (*c)(const MQTT::Publish& pub)) {
-  topic = buildTopic(t,true);
+  topic = t;
   callback = c;
 }
 
@@ -42,7 +42,7 @@ Output::Output(String t, void (*l)(String * msg)){
 }
 
 Output::Output(String t, void (*l)(String * msg), int i){
-    topic = buildTopic(t,true);
+    topic = t;
     loop = l;
     interval = i;
 }
@@ -97,11 +97,13 @@ void ESPThing::loop(){
 }
 
 void ESPThing::addOutput(const Output &o) {
-    outputs.push_back(o);
+    Output newOutput = Output(buildTopic(o.topic,true), o.loop, o.interval);
+    outputs.push_back(newOutput);
 }
 
 void ESPThing::addInput(const Input &i) {
-    inputs.push_back(i);
+    Input newInput = Input(buildTopic(i.topic, true), i.callback);
+    inputs.push_back(newInput);
 }
 
 void ESPThing::thingSubscribe(String t, void (*c)(const MQTT::Publish& pub)) {
