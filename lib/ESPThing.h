@@ -9,6 +9,10 @@
 #include "PubSubClient.h"
 #include <vector>
 
+/*!
+ * An Input listens on a specific topic for incoming messages and executes the supplied 
+ * callback function once a new message arrives.
+ */
 class Input {
     public:
         Input(){};
@@ -17,6 +21,12 @@ class Input {
         void (*callback)(const MQTT::Publish& pub);
 };
 
+/*!
+ * Outputs work the other way round than Inputs. You implement a method, which is executed 
+ * in loop(). When this method defines a String at msg, it is sent as message to the outputs 
+ * topic. Optionally you can add a third parameter to the Output class. An interval in 
+ * milliseconds in which the loop method should be executed. This defaults to 0.
+ */
 class Output {
     public:
         Output(){};

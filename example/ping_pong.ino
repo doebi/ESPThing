@@ -28,13 +28,13 @@ void ping_cb(const MQTT::Publish& pub) {
 void setup() {
     Serial.begin(115200);
     
-	//Thing.addOutput(Output("pong", pong_loop));
+	  //Thing.addOutput(Output("pong", pong_loop));
     //Thing.addOutput(Output("heartbeat", heartbeat_loop, 1000 * 60 * 3));
     //Thing.addInput(Input("ping", ping_cb));
 	
-	Thing.thingPublish("pong", pong_loop);
+	  Thing.publish("pong", pong_loop);
     Thing.thingPublish("heartbeat", heartbeat_loop, 1000 * 60 * 3);
-    Thing.thingSubscribe("ping", ping_cb);
+    Thing.subscribe("ping", ping_cb);
 }
 
 void loop() {
