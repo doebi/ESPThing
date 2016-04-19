@@ -12,12 +12,13 @@ When this method defines a String at msg, it is sent as message to the outputs t
 Optionally you can add a third parameter to the Output class. An interval in milliseconds in which the loop method should be executed. This defaults to 0.
 
 ### Example
-In this small exmaple we define an Input **ping** and an Output **pong**.
+In this small example we define an Input **ping** and an Output **pong**.
 When we receive a message on topic ping, we send a reply on topic pong.
 And a **heartbeat** is send every 3 minutes.
 
 ```arduino
 
+ESPThing Thing;
 bool ping = false;
 String ping_msg = "";
 
@@ -38,9 +39,9 @@ void heartbeat_loop(String * msg) {
 }
 
 void setup() {
-    Thing.addOutput(Output("pong", pong_loop));
-    Thing.addOutput(Output("heartbeat", heartbeat_loop, 1000 * 60 * 3));
-    Thing.addInput(Input("ping", ping_cb));
+    Thing.publish("pong", pong_loop);
+    Thing.thingPublish("heartbeat", heartbeat_loop, 1000 * 60 * 3);
+    Thing.subscribe("ping", ping_cb);
 }
 
 void loop() {
@@ -51,8 +52,8 @@ void loop() {
 The topics for this example would be:
 
 ```
-domain/FF:FF:FF:FF:FF:FF/ping
-domain/FF:FF:FF:FF:FF:FF/pong
+ping
+pong
 domain/FF:FF:FF:FF:FF:FF/heartbeat
 ```
 
