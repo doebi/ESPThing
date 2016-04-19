@@ -30,8 +30,7 @@ class Input {
 class Output {
     public:
         Output(){};
-        Output(String t, void (*l)(String * msg));
-        Output(String t, void (*l)(String * msg), int i);
+        Output(String t, void (*l)(String * msg), int i = 0);
         String topic;
         void (*loop)(String * msg);
         int interval;

@@ -37,10 +37,6 @@ Input::Input(String t, void (*c)(const MQTT::Publish& pub)) {
   callback = c;
 }
 
-Output::Output(String t, void (*l)(String * msg)){
-    Output(t,l,0);
-}
-
 Output::Output(String t, void (*l)(String * msg), int i){
     topic = t;
     loop = l;
