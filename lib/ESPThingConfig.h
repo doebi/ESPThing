@@ -12,7 +12,7 @@ typedef struct {
     String mqttDomain;
     int connectTime;
     int reconnectTime;
-    bool includeMac;
+    bool exposeMac;            // specifies whether the device's MAC address should be added to the internal topic prefix or not
 } thing_config_t;
 
 thing_config_t thingConfig = {

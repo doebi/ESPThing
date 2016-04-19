@@ -47,7 +47,6 @@ Output::Output(String t, void (*l)(String * msg), int i){
     interval = i;
 }
 
-
 ESPThing::ESPThing(){
   setup();
 }
@@ -118,6 +117,18 @@ void ESPThing::thingPublish(String t, void (*l)(String * msg), int i) {
     publish(t,l,i,true);
 }
 
+void ESPThing::subscribe(String t, void (*c)(const MQTT::Publish& pub)) {
+    subscribe(t,c,false);
+}
+
+void ESPThing::publish(String t, void (*l)(String * msg)) {
+    publish(t,l,0);
+}
+
+void ESPThing::publish(String t, void (*l)(String * msg), int i) {
+    publish(t,l,i,false);
+}
+
 // ##################################################################################
 // PRIVATE
 // ##################################################################################
@@ -138,7 +149,7 @@ void ESPThing::handleNotFound() {
 
 void ESPThing::mqtt_callback(const MQTT::Publish& pub) {
     for (auto &i : inputs) {
-        if (pub.topic() != NULL) {
+        if (pub.topic() == i.topic) {
             i.callback(pub);
         }
     }
@@ -165,7 +176,7 @@ void ESPThing::mqtt_loop() {
             MQTTClient.subscribe(INTERNAL_MQTT_TOPIC_PREFIX + "#");
             MQTTClient.publish(INTERNAL_MQTT_TOPIC_PREFIX + "status", "online", true);
             if (thingConfig.friendlyName) {
-                // if thingConfigured, publish our friendlyName
+                // if configured, publish our friendlyName
                 MQTTClient.publish(INTERNAL_MQTT_TOPIC_PREFIX + "name", thingConfig.friendlyName, true);
             }
         }
@@ -179,7 +190,11 @@ void ESPThing::server_loop() {
 }
 
 void ESPThing::subscribe(String t, void (*c)(const MQTT::Publish& pub), bool internal) {
-    inputs.push_back(Input(buildTopic(t, internal), c));
+    String topic = buildTopic(t, internal);
+    if (!internal) {
+        MQTTClient.subscribe(topic);
+    }
+    inputs.push_back(Input(topic, c));
 }
 
 void ESPThing::publish(String t, void (*l)(String * msg), int i, bool internal) {

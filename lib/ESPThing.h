@@ -65,6 +65,32 @@ class ESPThing {
          * \param i the interval in milliseconds after which the callback function is called
          */
         void thingPublish(String t, void (*l)(String * msg), int i);
+
+        /*!
+         * Convenience method for subscribing to a certain (device unrelated) topic 
+         * for which the given callback is called.
+         * 
+         * \param t the topic specified as absolute path
+         * \param c the callback function
+         */
+        void subscribe(String t, void (*c)(const MQTT::Publish& pub));
+
+         /*!
+         * Convenience method for publishing to a certain (device unrelated) topic.
+         * 
+         * \param t the topic specified as absolute path
+         * \param l the callback function which may set a new message to be published
+         */
+        void publish(String t, void (*l)(String * msg));
+
+        /*!
+         * Convenience method for publishing to a certain (device unrelated) topic.
+         * 
+         * \param t the topic specified as absolute path
+         * \param l the callback function which may set a new message to be published
+         * \param i the interval in milliseconds after which the callback function is called
+         */
+        void publish(String t, void (*l)(String * msg), int i);
         
     private:
         bool fallback = false;
