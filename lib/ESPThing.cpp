@@ -12,18 +12,41 @@
 #include "ESPThing.h"
 
 String NODE_ID = WiFi.macAddress();
-String MQTT_BASEPATH_WO_MAC = thingConfig.mqttDomain + "/";
-String MQTT_BASEPATH_W_MAC = MQTT_BASEPATH_WO_MAC + NODE_ID + "/";
-String MQTT_BASEPATH = thingConfig.includeMac ? MQTT_BASEPATH_W_MAC : MQTT_BASEPATH_WO_MAC;
+String PREFIX_WO_MAC = thingConfig.mqttDomain + "/";
+String PREFIX_WITH_MAC = PREFIX_WO_MAC + NODE_ID + "/";
+String INTERNAL_MQTT_TOPIC_PREFIX = thingConfig.exposeMac ? PREFIX_WITH_MAC : PREFIX_WO_MAC;
 
 WiFiManager wm;
 WiFiClient wc;
 PubSubClient MQTTClient(wc, thingConfig.mqttServer);
 ESP8266WebServer server(80);
 
+
+String buildTopic(String t, bool internal) {
+    return internal
+        ? INTERNAL_MQTT_TOPIC_PREFIX + t
+        : t;
+}
+
 // ##################################################################################
 // PUBLIC
 // ##################################################################################
+
+Input::Input(String t, void (*c)(const MQTT::Publish& pub)) {
+  topic = buildTopic(t,true);
+  callback = c;
+}
+
+Output::Output(String t, void (*l)(String * msg)){
+    Output(t,l,0);
+}
+
+Output::Output(String t, void (*l)(String * msg), int i){
+    topic = buildTopic(t,true);
+    loop = l;
+    interval = i;
+}
+
 
 ESPThing::ESPThing(){
   setup();
@@ -42,7 +65,7 @@ void ESPThing::loop(){
             if (o.last_run + o.interval <= now) {
                 o.loop(&msg);
                 if (msg != NULL) {
-                    MQTTClient.publish(MQTT_BASEPATH + o.topic, msg);
+                    MQTTClient.publish(o.topic, msg);
                 }
                 o.last_run = now;
             }
@@ -81,6 +104,18 @@ void ESPThing::addInput(const Input &i) {
     inputs.push_back(i);
 }
 
+void ESPThing::thingSubscribe(String t, void (*c)(const MQTT::Publish& pub)) {
+    subscribe(t,c,true);
+}
+
+void ESPThing::thingPublish(String t, void (*l)(String * msg)) {
+    thingPublish(t,l,0);
+}
+
+void ESPThing::thingPublish(String t, void (*l)(String * msg), int i) {
+    publish(t,l,i,true);
+}
+
 // ##################################################################################
 // PRIVATE
 // ##################################################################################
@@ -101,7 +136,7 @@ void ESPThing::handleNotFound() {
 
 void ESPThing::mqtt_callback(const MQTT::Publish& pub) {
     for (auto &i : inputs) {
-        if (pub.topic() == (MQTT_BASEPATH + i.topic)) {
+        if (pub.topic() != NULL) {
             i.callback(pub);
         }
     }
@@ -122,14 +157,14 @@ void ESPThing::mqtt_loop() {
         MQTTClient.loop();
     } else {
         log("connecting MQTT");
-        if (MQTTClient.connect(NODE_ID, MQTT_BASEPATH + "status", 0, true, "offline")) {
+        if (MQTTClient.connect(NODE_ID, INTERNAL_MQTT_TOPIC_PREFIX + "status", 0, true, "offline")) {
             log("MQTT connected");
             MQTTClient.set_callback(std::bind(&ESPThing::mqtt_callback, this, std::placeholders::_1));
-            MQTTClient.subscribe(MQTT_BASEPATH + "#");
-            MQTTClient.publish(MQTT_BASEPATH + "status", "online", true);
+            MQTTClient.subscribe(INTERNAL_MQTT_TOPIC_PREFIX + "#");
+            MQTTClient.publish(INTERNAL_MQTT_TOPIC_PREFIX + "status", "online", true);
             if (thingConfig.friendlyName) {
                 // if thingConfigured, publish our friendlyName
-                MQTTClient.publish(MQTT_BASEPATH + "name", thingConfig.friendlyName, true);
+                MQTTClient.publish(INTERNAL_MQTT_TOPIC_PREFIX + "name", thingConfig.friendlyName, true);
             }
         }
     }
@@ -141,8 +176,13 @@ void ESPThing::server_loop() {
     }
 }
 
+void ESPThing::subscribe(String t, void (*c)(const MQTT::Publish& pub), bool internal) {
+    inputs.push_back(Input(buildTopic(t, internal), c));
+}
 
-
+void ESPThing::publish(String t, void (*l)(String * msg), int i, bool internal) {
+    outputs.push_back(Output(buildTopic(t,internal),l,i));
+}
 
 
 
