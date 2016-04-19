@@ -109,20 +109,12 @@ void ESPThing::thingSubscribe(String t, void (*c)(const MQTT::Publish& pub)) {
     subscribe(t,c,true);
 }
 
-void ESPThing::thingPublish(String t, void (*l)(String * msg)) {
-    thingPublish(t,l,0);
-}
-
 void ESPThing::thingPublish(String t, void (*l)(String * msg), int i) {
     publish(t,l,i,true);
 }
 
 void ESPThing::subscribe(String t, void (*c)(const MQTT::Publish& pub)) {
     subscribe(t,c,false);
-}
-
-void ESPThing::publish(String t, void (*l)(String * msg)) {
-    publish(t,l,0);
 }
 
 void ESPThing::publish(String t, void (*l)(String * msg), int i) {
