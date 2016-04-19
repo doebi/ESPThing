@@ -12,10 +12,10 @@ typedef struct {
     String mqttDomain;
     int connectTime;
     int reconnectTime;
-	bool includeMac;
+    bool includeMac;
 } thing_config_t;
 
-thing_config_t config = {
+thing_config_t thingConfig = {
     {
         { "<ssid>", "<password>" }
     },
@@ -24,5 +24,5 @@ thing_config_t config = {
     "devlol/things",
     60,
     60 * 15,
-	true
+    true
 };
