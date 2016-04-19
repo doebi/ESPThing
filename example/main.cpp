@@ -5,6 +5,7 @@
  */
 #include "ESPThing.h"
 
+ESPThing Thing;
 bool ping = false;
 String ping_msg = "";
 
