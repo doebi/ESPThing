@@ -5,6 +5,7 @@
  */
 #include "ESPThing.h"
 
+ESPThing Thing;
 bool ping = false;
 String ping_msg = "";
 
@@ -26,9 +27,14 @@ void ping_cb(const MQTT::Publish& pub) {
 
 void setup() {
     Serial.begin(115200);
-    Thing.addOutput(Output("pong", pong_loop));
-    Thing.addOutput(Output("heartbeat", heartbeat_loop, 1000 * 60 * 3));
-    Thing.addInput(Input("ping", ping_cb));
+    
+	  //Thing.addOutput(Output("pong", pong_loop));
+    //Thing.addOutput(Output("heartbeat", heartbeat_loop, 1000 * 60 * 3));
+    //Thing.addInput(Input("ping", ping_cb));
+	
+	  Thing.publish("pong", pong_loop);
+    Thing.thingPublish("heartbeat", heartbeat_loop, 1000 * 60 * 3);
+    Thing.subscribe("ping", ping_cb);
 }
 
 void loop() {
